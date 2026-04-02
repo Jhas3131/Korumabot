@@ -1,4 +1,5 @@
 import time
+import asyncio
 from pyrogram import Client, filters, enums
 from pyrogram.types import ChatPermissions
 from flask import Flask
@@ -71,20 +72,23 @@ async def track_bans(client, update):
 
         if len(admin_logs[admin_id]) > LIMIT_COUNT:
             try:
-                # Yetki al (Mesaj atmasını engelle ve yetkileri sıfırla)
                 await client.restrict_chat_member(update.chat.id, admin_id, ChatPermissions(can_send_messages=False))
-                
                 await client.send_message(update.chat.id, f"🚨 **Saldırı Engellendi!**\nAdmin {from_user.mention} yetkileri alındı.")
-                
                 try:
-                    await client.send_message(admin_id, "iyi denemeydi salak orruspu evladı 🤠")
-                except:
-                    pass
-                
+                    await client.send_message(admin_id, "🤠 iyi denemeydi")
+                except: pass
                 admin_logs[admin_id] = []
             except Exception as e:
                 print(f"Hata: {e}")
 
-if __name__ == "__main__":
+# --- YENİ BAŞLATMA MANTIĞI ---
+async def main():
     Thread(target=run_web).start()
-    app_bot.run()
+    await app_bot.start()
+    print("Bot başarıyla başlatıldı!")
+    await asyncio.Event().wait()
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    
